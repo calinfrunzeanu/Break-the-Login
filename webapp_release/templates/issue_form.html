@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head><title>AuthX - Issue</title></head>
+<body>
+
+<h1>AuthX Internal Portal - {% if ticket %}Edit Issue #{{ ticket.id }}{% else %}New Issue{% endif %}</h1>
+
+{% if error %}
+<p>{{ error }}</p>
+{% endif %}
+
+<form method="post">
+    <p>
+        <label for="title">Title:</label><br>
+        <input type="text" id="title" name="title" value="{{ ticket.title if ticket else '' }}" required>
+    </p>
+    <p>
+        <label for="description">Description:</label><br>
+        <textarea id="description" name="description" rows="5" cols="50">{{ ticket.description if ticket else '' }}</textarea>
+    </p>
+    <p>
+        <label for="severity">Severity:</label><br>
+        <select id="severity" name="severity">
+            <option value="LOW" {% if ticket and ticket['severity'] == 'LOW' %}selected{% endif %}>LOW</option>
+            <option value="MED" {% if ticket and ticket['severity'] == 'MED' %}selected{% endif %}>MED</option>
+            <option value="HIGH" {% if ticket and ticket['severity'] == 'HIGH' %}selected{% endif %}>HIGH</option>
+        </select>
+    </p>
+    {% if ticket %}
+    <p>
+        <label for="status">Status:</label><br>
+        <select id="status" name="status">
+            <option value="OPEN" {% if ticket['status'] == 'OPEN' %}selected{% endif %}>OPEN</option>
+            <option value="IN_PROGRESS" {% if ticket['status'] == 'IN_PROGRESS' %}selected{% endif %}>IN_PROGRESS</option>
+            <option value="RESOLVED" {% if ticket['status'] == 'RESOLVED' %}selected{% endif %}>RESOLVED</option>
+        </select>
+    </p>
+    {% endif %}
+    <p><input type="submit" value="{% if ticket %}Save Changes{% else %}Create Issue{% endif %}"></p>
+</form>
+
+<p><a href="/tickets">Back to Issues</a></p>
+
+</body>
+</html>

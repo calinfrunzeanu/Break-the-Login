@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head><title>AuthX - Recover Account</title></head>
+<body>
+
+<h1>AuthX Internal Portal - Recover Account</h1>
+
+{% if message %}
+<p>{{ message }}</p>
+{% endif %}
+
+<form method="post">
+    <p>
+        <label for="email">Email:</label><br>
+        <input type="text" id="email" name="email" required>
+    </p>
+    <p><input type="submit" value="Request Password Reset"></p>
+</form>
+
+<p><a href="/login">Back to Login</a></p>
+
+</body>
+</html>

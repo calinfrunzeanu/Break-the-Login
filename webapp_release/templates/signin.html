@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head><title>AuthX - Sign In</title></head>
+<body>
+
+<h1>AuthX Internal Portal - Sign In</h1>
+
+{% if error %}
+<p>{{ error }}</p>
+{% endif %}
+
+<form method="post">
+    <p>
+        <label for="email">Email:</label><br>
+        <input type="text" id="email" name="email" required>
+    </p>
+    <p>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required>
+    </p>
+    <p><input type="submit" value="Login"></p>
+</form>
+
+<p><a href="/forgot-password">Forgot password?</a></p>
+<p><a href="/register">No account? Register here.</a></p>
+
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head><title>AuthX - Sign Up</title></head>
+<body>
+
+<h1>AuthX Internal Portal - Sign Up</h1>
+
+<p>Cerinte parola: minim 8 caractere, cel putin o litera mare, o litera mica si o cifra.</p>
+
+{% if error %}
+<p>{{ error }}</p>
+{% endif %}
+
+<form method="post">
+    <p>
+        <label for="email">Email:</label><br>
+        <input type="text" id="email" name="email" required>
+    </p>
+    <p>
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required>
+    </p>
+    <p><input type="submit" value="Register"></p>
+</form>
+
+<p><a href="/login">Already have an account? Login here.</a></p>
+
+</body>
+</html>

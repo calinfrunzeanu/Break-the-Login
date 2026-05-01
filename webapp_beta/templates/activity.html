@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head><title>AuthX - Activity Log</title></head>
+<body>
+
+<h1>AuthX Internal Portal - Activity Log</h1>
+
+<p>
+    <a href="/dashboard">Dashboard</a> |
+    <a href="/logout">Logout</a>
+</p>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>User</th>
+        <th>Action</th>
+        <th>Resource</th>
+        <th>Resource ID</th>
+        <th>Timestamp</th>
+        <th>IP Address</th>
+    </tr>
+    {% for log in logs %}
+    <tr>
+        <td>{{ log.id }}</td>
+        <td>{{ log.email }}</td>
+        <td>{{ log.action }}</td>
+        <td>{{ log.resource }}</td>
+        <td>{{ log.resource_id }}</td>
+        <td>{{ log.timestamp }}</td>
+        <td>{{ log.ip_address }}</td>
+    </tr>
+    {% else %}
+    <tr>
+        <td colspan="7">No logs found.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>

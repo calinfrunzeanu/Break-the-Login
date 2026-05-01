@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head><title>AuthX - Issues</title></head>
+<body>
+
+<h1>AuthX Internal Portal - Issues</h1>
+
+<p>
+    <a href="/tickets/new">Create New Ticket</a> |
+    <a href="/dashboard">Dashboard</a> |
+    <a href="/logout">Logout</a>
+</p>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Severity</th>
+        <th>Status</th>
+        <th>Owner</th>
+        <th>Created</th>
+        <th>Action</th>
+    </tr>
+    {% for ticket in tickets %}
+    <tr>
+        <td>{{ ticket.id }}</td>
+        <td>{{ ticket.title }}</td>
+        <td>{{ ticket.severity }}</td>
+        <td>{{ ticket.status }}</td>
+        <td>{{ ticket.owner_email }}</td>
+        <td>{{ ticket.created_at }}</td>
+        <td><a href="/tickets/{{ ticket.id }}">Edit</a></td>
+    </tr>
+    {% else %}
+    <tr>
+        <td colspan="7">No tickets found.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>
